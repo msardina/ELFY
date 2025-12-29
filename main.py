@@ -9,6 +9,11 @@ mixer.init()
 
 FOLDER_ASSETS = Path("assets")
 
+# setup font
+font = pygame.font.SysFont("freesansbold", 50)
+title_font = pygame.font.SysFont(None, 100)
+medium_font = pygame.font.SysFont(None, 75)
+
 
 # scaler
 def scale_img(img, scale_factor):
@@ -17,15 +22,15 @@ def scale_img(img, scale_factor):
 
 
 # load images
-elf_run_1 = scale_img(pygame.image.load(FOLDER_ASSETS / "run1.png"), 2)
-elf_run_2 = scale_img(pygame.image.load(FOLDER_ASSETS / "run2.png"), 2)
-elf_stand = scale_img(pygame.image.load(FOLDER_ASSETS / "stand.png"), 2)
+elf_run_1 = scale_img(pygame.image.load(FOLDER_ASSETS / "run1.png"), 2.5)
+elf_run_2 = scale_img(pygame.image.load(FOLDER_ASSETS / "run2.png"), 2.5)
+elf_stand = scale_img(pygame.image.load(FOLDER_ASSETS / "stand.png"), 2.5)
 elf_imgs = [elf_run_1, elf_run_2, elf_stand]
 
 present_imgs = []
 for i in range(1, 5):
     present_imgs.append(
-        scale_img(pygame.image.load(FOLDER_ASSETS / f"present{i}.png"), 3)
+        scale_img(pygame.image.load(FOLDER_ASSETS / f"present{i}.png"), 4)
     )
 print(len(present_imgs))
 print(present_imgs)
@@ -57,8 +62,13 @@ class Present:
         self.y += self.speed
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
-    def is_present_over(self, otherrect):
-        if self.y > HEIGHT or pygame.Rect.colliderect(self.rect, otherrect):
+    def present_collected(self, otherrect):
+        if pygame.Rect.colliderect(self.rect, otherrect):
+            return True
+        return False
+
+    def is_present_over(self):
+        if self.y > HEIGHT:
             return True
         return False
 
@@ -105,9 +115,10 @@ def game():
     run = True
     animate_timer = 0
     present_timer = 0
+    score = 0
 
     # objects
-    player = Elf(0, HEIGHT - elf_imgs[2].get_height() - FLOOR_HEIGHT, elf_imgs)
+    player = Elf(0, HEIGHT - elf_imgs[2].get_height(), elf_imgs)
     presents = []
 
     # main game loop
@@ -118,9 +129,13 @@ def game():
                 pygame.quit()
                 quit()
 
+        # render text
+        score_text = title_font.render(f"{score}", True, (0, 0, 0))
+
         # draw
         screen.fill("white")
         player.draw()
+        screen.blit(score_text, (WIDTH / 2 - score_text.get_width() / 2, 50))
 
         # move
         player.move(pygame.key.get_pressed())
@@ -150,8 +165,12 @@ def game():
             present.move()
 
             # find if present need to be removed
-            if present.is_present_over(player.rect):
+            if present.is_present_over() or present.present_collected(player.rect):
                 delete_present_index.append(presents.index(present))
+
+            # find if collected by elf
+            if present.present_collected(player.rect):
+                score += 1
 
         # remove all presents which have been collided
         for i in range(0, len(delete_present_index)):
