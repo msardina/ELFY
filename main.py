@@ -14,6 +14,9 @@ font = pygame.font.SysFont("freesansbold", 50)
 title_font = pygame.font.SysFont(None, 100)
 medium_font = pygame.font.SysFont(None, 75)
 
+# const
+GRAVITY = 0.6
+
 
 # scaler
 def scale_img(img, scale_factor):
@@ -76,6 +79,7 @@ class Elf:
     def __init__(self, x, y, imgs):
         self.x = x
         self.y = y
+        self.dy = 0
         self.imgs = imgs
         self.img = self.imgs[2]
         self.width = self.img.get_width()
@@ -92,7 +96,16 @@ class Elf:
             self.x += self.speed
         if keys[pygame.K_LEFT]:
             self.x -= self.speed
+        if keys[pygame.K_UP] and self.y == HEIGHT - self.height:
+            self.dy = 13
 
+        self.y -= self.dy
+
+        if self.y < HEIGHT - self.height:
+            self.dy -= GRAVITY
+        else:
+            self.dy = 0
+            self.y = HEIGHT - self.height
         # update rect
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
