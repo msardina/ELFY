@@ -15,7 +15,7 @@ title_font = pygame.font.SysFont(None, 100)
 medium_font = pygame.font.SysFont(None, 75)
 
 # const
-GRAVITY = 0.6
+GRAVITY = 0.4
 
 
 # scaler
@@ -30,6 +30,10 @@ elf_run_2 = scale_img(pygame.image.load(FOLDER_ASSETS / "run2.png"), 2.5)
 elf_stand = scale_img(pygame.image.load(FOLDER_ASSETS / "stand.png"), 2.5)
 elf_imgs = [elf_run_1, elf_run_2, elf_stand]
 
+skier_1_img = scale_img(pygame.image.load(FOLDER_ASSETS / "ski1.png"), 1)
+skier_2_img = scale_img(pygame.image.load(FOLDER_ASSETS / "ski2.png"), 1)
+skier_3_img = scale_img(pygame.image.load(FOLDER_ASSETS / "ski3.png"), 1)
+skiers_imgs = [skier_1_img, skier_2_img, skier_3_img]
 present_imgs = []
 for i in range(1, 5):
     present_imgs.append(
@@ -122,6 +126,40 @@ class Elf:
             self.img = self.imgs[2]
 
 
+class Skier:
+    def __init__(self, y, img, side):
+
+        self.y = y
+        self.img = img
+        self.side = side
+        self.width = self.img.get_width()
+        self.height = self.img.get_height()
+        self.speed = random.randint(5, 10)
+
+        if side == 0:
+            self.x = 0 - self.width
+        else:
+            self.x = WIDTH
+            self.img = pygame.transform.flip(self.img, True, False)
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+
+    def draw(self):
+        screen.blit(self.img, (self.x, self.y))
+
+    def move(self):
+        if self.side == 0:
+            self.x += self.speed
+        if self.side == 1:
+            self.x -= self.speed
+
+    def is_offscreen(self):
+        if self.side == 0 and self.x > WIDTH:
+            return True
+        if self.side == 1 and self.x < 0 - self.width:
+            return True
+        return False
+
+
 def game():
     # variables
     run = True
@@ -135,6 +173,8 @@ def game():
     # objects
     player = Elf(0, HEIGHT - elf_imgs[2].get_height(), elf_imgs)
     presents = []
+    skiers = []
+    skier_random = 0
 
     # main game loop
     while run:
@@ -191,12 +231,30 @@ def game():
         for i in range(0, len(delete_present_index)):
             presents.remove(presents[delete_present_index[i]])
 
+        # draw skiers
+
+        for skier in skiers:
+            skier.draw()
+            skier.move()
+
+            if skier.is_offscreen():
+                skiers.remove(skier)
         # difficulty curb
         if difficulty_timer > 50:
-            print("difficulty increase")
             present_spawn -= 0.05
             fall_speed += 0.4
             difficulty_timer = 0
+
+        # spawn skiers
+        if random.randint(1, 200) == 1:
+            skier_random = random.randint(0, 2)
+            skiers.append(
+                Skier(
+                    HEIGHT - skiers_imgs[skier_random].get_height(),
+                    skiers_imgs[skier_random],
+                    random.randint(0, 1),
+                )
+            )
         # update
         pygame.display.update()
         clock.tick(FPS)
