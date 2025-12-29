@@ -25,6 +25,7 @@ game_music.play()
 speed_sfx = pygame.mixer.Sound(FOLDER_SOUNDS / "speed.wav")
 speed_sfx.set_volume(2)
 hit_sfx = pygame.mixer.Sound(FOLDER_SOUNDS / "hit.wav")
+collect_sfx = pygame.mixer.Sound(FOLDER_SOUNDS / "collect.wav")
 
 
 # scaler
@@ -329,6 +330,7 @@ def game():
             # find if collected by elf
             if present.present_collected(player.mask, player.x, player.y):
                 score += 1
+                collect_sfx.play()
 
         # remove all presents which have been collided
         for i in range(0, len(delete_present_index)):
