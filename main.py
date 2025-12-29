@@ -215,7 +215,7 @@ def title():
 
         if not begin:
             screen.blit(elf_title, (WIDTH / 2 - elf_title.get_width() / 2, 100))
-            screen.blit(arrows, (WIDTH / 2 - arrows.get_width() / 2, 500))
+            screen.blit(arrows, (WIDTH / 2 - arrows.get_width() / 2, 410))
             screen.blit(begin_img, (begin_x, HEIGHT - begin_img.get_height() - 5))
         screen.blit(
             elf_imgs[elf_num], (WIDTH / 2 - elf_imgs[2].get_width() / 2, elf_begin_y)
