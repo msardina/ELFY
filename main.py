@@ -8,6 +8,7 @@ pygame.init()
 mixer.init()
 
 FOLDER_ASSETS = Path("assets")
+FOLDER_SOUNDS = Path("sfx")
 
 # setup font
 font = pygame.font.SysFont("freesansbold", 50)
@@ -16,6 +17,10 @@ medium_font = pygame.font.SysFont(None, 75)
 
 # const
 GRAVITY = 0.4
+
+# music
+game_music = pygame.mixer.Sound(FOLDER_SOUNDS / "Determination.wav")
+title_music = pygame.mixer.Sound(FOLDER_SOUNDS / "credits2.wav")
 
 
 # scaler
@@ -190,6 +195,11 @@ def title():
     begin = False
     elf_begin_y = 450
     elf_begin_dy = 0
+
+    # music
+    mixer.stop()
+    title_music.play(-1)
+
     while title:
 
         for event in pygame.event.get():
@@ -232,6 +242,10 @@ def game():
     present_spawn = 1
     difficulty_timer = 0
     die = False
+
+    # music
+    mixer.stop()
+    game_music.play(-1)
 
     # objects
     player = Elf(
