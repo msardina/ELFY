@@ -265,8 +265,7 @@ def game():
     die = False
 
     # music
-    # mixer.stop()
-    # game_music.play(-1)
+    collect_sfx.play()
 
     # objects
     player = Elf(
