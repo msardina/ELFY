@@ -125,17 +125,14 @@ class Elf:
         # update mask
         self.mask = pygame.mask.from_surface(self.img)
 
-    def animate(self, keys):
-        if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
-            if self.img == self.imgs[0]:
-                self.img = self.imgs[1]
-            elif self.img == self.imgs[1]:
-                self.img = self.imgs[0]
+    def animate(self):
+        if self.img == self.imgs[0]:
+            self.img = self.imgs[1]
+        elif self.img == self.imgs[1]:
+            self.img = self.imgs[0]
 
-            elif self.img == self.imgs[2]:
-                self.img = self.imgs[0]
-        else:
-            self.img = self.imgs[2]
+        elif self.img == self.imgs[2]:
+            self.img = self.imgs[0]
 
     def die_animation(self):
         self.dy = 13
@@ -195,7 +192,8 @@ def title():
     begin = False
     elf_begin_y = 450
     elf_begin_dy = 0
-
+    elf_num = 0
+    animate_timer = 0
     # music
     mixer.stop()
     title_music.play(-1)
@@ -214,7 +212,9 @@ def title():
         if not begin:
             screen.blit(elf_title, (WIDTH / 2 - elf_title.get_width() / 2, 100))
             screen.blit(elf_arrows, (WIDTH / 2 - elf_arrows.get_width() / 2, 500))
-        screen.blit(elf_imgs[2], (WIDTH / 2 - elf_imgs[2].get_width() / 2, elf_begin_y))
+        screen.blit(
+            elf_imgs[elf_num], (WIDTH / 2 - elf_imgs[2].get_width() / 2, elf_begin_y)
+        )
         # keys
         keys = pygame.key.get_pressed()
 
@@ -227,9 +227,17 @@ def title():
         if elf_begin_y > HEIGHT - elf_imgs[2].get_height():
             title = False
 
+        if animate_timer > 1:
+            if elf_num == 0:
+                elf_num = 1
+            elif elf_num == 1:
+                elf_num = 0
+            animate_timer = 0
+
         # update
         clock.tick(FPS)
         pygame.display.update()
+        animate_timer += 0.13
 
 
 def game():
@@ -244,8 +252,8 @@ def game():
     die = False
 
     # music
-    mixer.stop()
-    game_music.play(-1)
+    # mixer.stop()
+    # game_music.play(-1)
 
     # objects
     player = Elf(
@@ -278,7 +286,7 @@ def game():
 
         # animate
         if animate_timer > 1:
-            player.animate(pygame.key.get_pressed())
+            player.animate()
             animate_timer = 0
 
         # spawn presents
