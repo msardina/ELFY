@@ -55,9 +55,10 @@ class Present:
 
     def move(self):
         self.y += self.speed
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
-    def is_offscreen(self):
-        if self.y > HEIGHT:
+    def is_present_over(self, otherrect):
+        if self.y > HEIGHT or pygame.Rect.colliderect(self.rect, otherrect):
             return True
         return False
 
@@ -141,11 +142,20 @@ def game():
             present_timer = 0
 
         # draw presents
+        delete_present_index = []
         for present in presents:
+
+            # draw present
             present.draw()
             present.move()
-            if present.is_offscreen():
-                presents.remove(present)
+
+            # find if present need to be removed
+            if present.is_present_over(player.rect):
+                delete_present_index.append(presents.index(present))
+
+        # remove all presents which have been collided
+        for i in range(0, len(delete_present_index)):
+            presents.remove(presents[delete_present_index[i]])
 
         # update
         pygame.display.update()
