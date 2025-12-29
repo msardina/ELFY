@@ -39,8 +39,8 @@ for i in range(1, 5):
     present_imgs.append(
         scale_img(pygame.image.load(FOLDER_ASSETS / f"present{i}.png"), 4)
     )
-print(len(present_imgs))
-print(present_imgs)
+elf_title = scale_img(pygame.image.load(FOLDER_ASSETS / "title.png"), 1)
+elf_arrows = scale_img(pygame.image.load(FOLDER_ASSETS / "arrows.png"), 1)
 # setup screen
 FLOOR_HEIGHT = 60
 WIDTH, HEIGHT = 800, 800
@@ -184,6 +184,44 @@ class Skier:
         return False
 
 
+def title():
+    # variables
+    title = True
+    begin = False
+    elf_begin_y = 450
+    elf_begin_dy = 0
+    while title:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                title = False
+                pygame.quit()
+                quit()
+
+        # draw
+        screen.fill("white")
+
+        if not begin:
+            screen.blit(elf_title, (WIDTH / 2 - elf_title.get_width() / 2, 100))
+            screen.blit(elf_arrows, (WIDTH / 2 - elf_arrows.get_width() / 2, 500))
+        screen.blit(elf_imgs[2], (WIDTH / 2 - elf_imgs[2].get_width() / 2, elf_begin_y))
+        # keys
+        keys = pygame.key.get_pressed()
+
+        # START ANIMATION
+        if keys[pygame.K_RETURN]:
+            begin = True
+        if begin:
+            elf_begin_y += elf_begin_dy
+            elf_begin_dy += GRAVITY
+        if elf_begin_y > HEIGHT - elf_imgs[2].get_height():
+            title = False
+
+        # update
+        clock.tick(FPS)
+        pygame.display.update()
+
+
 def game():
     # variables
     run = True
@@ -196,7 +234,11 @@ def game():
     die = False
 
     # objects
-    player = Elf(0, HEIGHT - elf_imgs[2].get_height(), elf_imgs)
+    player = Elf(
+        WIDTH / 2 - elf_imgs[2].get_width() / 2,
+        HEIGHT - elf_imgs[2].get_height(),
+        elf_imgs,
+    )
     presents = []
     skiers = []
     skier_random = 0
@@ -306,4 +348,7 @@ def game():
 # run whole game
 
 if __name__ == "__main__":
-    game()
+
+    while True:
+        title()
+        game()
