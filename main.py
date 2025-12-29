@@ -53,13 +53,12 @@ class Present:
         self.width = self.img.get_width()
         self.height = self.img.get_height()
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        self.speed = 3
 
     def draw(self):
         screen.blit(self.img, (self.x, self.y))
 
-    def move(self):
-        self.y += self.speed
+    def move(self, fall_speed):
+        self.y += fall_speed
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def present_collected(self, otherrect):
@@ -116,6 +115,9 @@ def game():
     animate_timer = 0
     present_timer = 0
     score = 0
+    fall_speed = 3
+    present_spawn = 1
+    difficulty_timer = 0
 
     # objects
     player = Elf(0, HEIGHT - elf_imgs[2].get_height(), elf_imgs)
@@ -146,7 +148,7 @@ def game():
             animate_timer = 0
 
         # spawn presents
-        if present_timer > 1:
+        if present_timer > present_spawn:
             presents.append(
                 Present(
                     random.randint(0, WIDTH - present_imgs[0].get_width()),
@@ -162,7 +164,7 @@ def game():
 
             # draw present
             present.draw()
-            present.move()
+            present.move(fall_speed)
 
             # find if present need to be removed
             if present.is_present_over() or present.present_collected(player.rect):
@@ -176,11 +178,18 @@ def game():
         for i in range(0, len(delete_present_index)):
             presents.remove(presents[delete_present_index[i]])
 
+        # difficulty curb
+        if difficulty_timer > 50:
+            print("difficulty increase")
+            present_spawn -= 0.05
+            fall_speed += 0.4
+            difficulty_timer = 0
         # update
         pygame.display.update()
         clock.tick(FPS)
         animate_timer += 0.13
         present_timer += 0.013
+        difficulty_timer += 0.10
 
 
 # run whole game
