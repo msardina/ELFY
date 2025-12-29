@@ -131,7 +131,7 @@ def game():
             animate_timer = 0
 
         # spawn presents
-        if present_timer > 2:
+        if present_timer > 1:
             presents.append(
                 Present(
                     random.randint(0, WIDTH - present_imgs[0].get_width()),
