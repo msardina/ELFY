@@ -19,8 +19,12 @@ medium_font = pygame.font.SysFont(None, 75)
 GRAVITY = 0.4
 
 # music
-game_music = pygame.mixer.Sound(FOLDER_SOUNDS / "Determination.wav")
-title_music = pygame.mixer.Sound(FOLDER_SOUNDS / "credits2.wav")
+game_music = pygame.mixer.Sound(FOLDER_SOUNDS / "background.wav")
+game_music.set_volume(0.6)
+game_music.play()
+speed_sfx = pygame.mixer.Sound(FOLDER_SOUNDS / "speed.wav")
+speed_sfx.set_volume(2)
+hit_sfx = pygame.mixer.Sound(FOLDER_SOUNDS / "hit.wav")
 
 
 # scaler
@@ -45,7 +49,9 @@ for i in range(1, 5):
         scale_img(pygame.image.load(FOLDER_ASSETS / f"present{i}.png"), 4)
     )
 elf_title = scale_img(pygame.image.load(FOLDER_ASSETS / "title.png"), 1)
-elf_arrows = scale_img(pygame.image.load(FOLDER_ASSETS / "arrows.png"), 1)
+arrows = scale_img(pygame.image.load(FOLDER_ASSETS / "arrows.png"), 1)
+begin_img = scale_img(pygame.image.load(FOLDER_ASSETS / "begin.png"), 1)
+
 # setup screen
 FLOOR_HEIGHT = 60
 WIDTH, HEIGHT = 800, 800
@@ -194,9 +200,7 @@ def title():
     elf_begin_dy = 0
     elf_num = 0
     animate_timer = 0
-    # music
-    mixer.stop()
-    title_music.play(-1)
+    begin_x = WIDTH
 
     while title:
 
@@ -211,10 +215,12 @@ def title():
 
         if not begin:
             screen.blit(elf_title, (WIDTH / 2 - elf_title.get_width() / 2, 100))
-            screen.blit(elf_arrows, (WIDTH / 2 - elf_arrows.get_width() / 2, 500))
+            screen.blit(arrows, (WIDTH / 2 - arrows.get_width() / 2, 500))
+            screen.blit(begin_img, (begin_x, HEIGHT - begin_img.get_height() - 5))
         screen.blit(
             elf_imgs[elf_num], (WIDTH / 2 - elf_imgs[2].get_width() / 2, elf_begin_y)
         )
+
         # keys
         keys = pygame.key.get_pressed()
 
@@ -233,6 +239,12 @@ def title():
             elif elf_num == 1:
                 elf_num = 0
             animate_timer = 0
+
+        # begin text
+        begin_x -= 3
+
+        if begin_x < WIDTH * -1:
+            begin_x = WIDTH
 
         # update
         clock.tick(FPS)
@@ -332,6 +344,7 @@ def game():
                 skiers.remove(skier)
             if skier.hit_elf(player.mask, player.x, player.y, player.die):
                 die = True
+                hit_sfx.play()
         # difficulty curb
         if difficulty_timer > 50:
             present_spawn -= 0.05
@@ -340,6 +353,7 @@ def game():
 
         # spawn skiers
         if random.randint(1, 200) == 1:
+            speed_sfx.play()
             skier_random = random.randint(0, 2)
             skiers.append(
                 Skier(
