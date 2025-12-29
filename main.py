@@ -114,9 +114,9 @@ class Elf:
 
         if not self.die:
             # keys
-            if keys[pygame.K_RIGHT]:
+            if keys[pygame.K_RIGHT] and self.x < WIDTH - self.width:
                 self.x += self.speed
-            if keys[pygame.K_LEFT]:
+            if keys[pygame.K_LEFT] and self.x > 0:
                 self.x -= self.speed
             if keys[pygame.K_UP] and self.y == HEIGHT - self.height:
                 self.dy = 13
