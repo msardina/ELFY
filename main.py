@@ -59,18 +59,20 @@ class Present:
         self.img = img
         self.width = self.img.get_width()
         self.height = self.img.get_height()
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.mask = pygame.mask.from_surface(self.img)
+        self.mask_img = self.mask.to_surface()
 
     def draw(self):
         screen.blit(self.img, (self.x, self.y))
 
     def move(self, fall_speed):
         self.y += fall_speed
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.mask = pygame.mask.from_surface(self.img)
 
-    def present_collected(self, otherrect):
-        if pygame.Rect.colliderect(self.rect, otherrect):
+    def present_collected(self, othermask, otherx, othery):
+        if self.mask.overlap(othermask, (otherx - self.x, othery - self.y)):
             return True
+
         return False
 
     def is_present_over(self):
@@ -88,30 +90,35 @@ class Elf:
         self.img = self.imgs[2]
         self.width = self.img.get_width()
         self.height = self.img.get_height()
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.mask = pygame.mask.from_surface(self.img)
+        self.mask_img = self.mask.to_surface()
         self.speed = 5
+        self.die = False
 
     def draw(self):
         screen.blit(self.img, (self.x, self.y))
 
     def move(self, keys):
-        # keys
-        if keys[pygame.K_RIGHT]:
-            self.x += self.speed
-        if keys[pygame.K_LEFT]:
-            self.x -= self.speed
-        if keys[pygame.K_UP] and self.y == HEIGHT - self.height:
-            self.dy = 13
+
+        if not self.die:
+            # keys
+            if keys[pygame.K_RIGHT]:
+                self.x += self.speed
+            if keys[pygame.K_LEFT]:
+                self.x -= self.speed
+            if keys[pygame.K_UP] and self.y == HEIGHT - self.height:
+                self.dy = 13
 
         self.y -= self.dy
 
         if self.y < HEIGHT - self.height:
             self.dy -= GRAVITY
         else:
-            self.dy = 0
-            self.y = HEIGHT - self.height
-        # update rect
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+            if not self.die:
+                self.dy = 0
+                self.y = HEIGHT - self.height
+        # update mask
+        self.mask = pygame.mask.from_surface(self.img)
 
     def animate(self, keys):
         if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
@@ -125,6 +132,10 @@ class Elf:
         else:
             self.img = self.imgs[2]
 
+    def die_animation(self):
+        self.dy = 13
+        self.die = True
+
 
 class Skier:
     def __init__(self, y, img, side):
@@ -135,13 +146,14 @@ class Skier:
         self.width = self.img.get_width()
         self.height = self.img.get_height()
         self.speed = random.randint(5, 10)
+        self.mask = pygame.mask.from_surface(self.img)
+        self.mask_img = self.mask.to_surface()
 
         if side == 0:
             self.x = 0 - self.width
         else:
             self.x = WIDTH
             self.img = pygame.transform.flip(self.img, True, False)
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def draw(self):
         screen.blit(self.img, (self.x, self.y))
@@ -152,11 +164,23 @@ class Skier:
         if self.side == 1:
             self.x -= self.speed
 
+        # update rect
+        self.mask = pygame.mask.from_surface(self.img)
+
     def is_offscreen(self):
         if self.side == 0 and self.x > WIDTH:
             return True
         if self.side == 1 and self.x < 0 - self.width:
             return True
+        return False
+
+    def hit_elf(self, othermask, otherx, othery, otherdie):
+        if (
+            self.mask.overlap(othermask, (otherx - self.x, othery - self.y))
+            and not otherdie
+        ):
+            return True
+
         return False
 
 
@@ -169,6 +193,7 @@ def game():
     fall_speed = 3
     present_spawn = 1
     difficulty_timer = 0
+    die = False
 
     # objects
     player = Elf(0, HEIGHT - elf_imgs[2].get_height(), elf_imgs)
@@ -220,11 +245,13 @@ def game():
             present.move(fall_speed)
 
             # find if present need to be removed
-            if present.is_present_over() or present.present_collected(player.rect):
+            if present.is_present_over() or present.present_collected(
+                player.mask, player.x, player.y
+            ):
                 delete_present_index.append(presents.index(present))
 
             # find if collected by elf
-            if present.present_collected(player.rect):
+            if present.present_collected(player.mask, player.x, player.y):
                 score += 1
 
         # remove all presents which have been collided
@@ -239,6 +266,8 @@ def game():
 
             if skier.is_offscreen():
                 skiers.remove(skier)
+            if skier.hit_elf(player.mask, player.x, player.y, player.die):
+                die = True
         # difficulty curb
         if difficulty_timer > 50:
             present_spawn -= 0.05
@@ -255,6 +284,17 @@ def game():
                     random.randint(0, 1),
                 )
             )
+
+        # die animation
+        if die:
+            player.die_animation()
+            die = False
+
+        # game over
+
+        if player.y > HEIGHT * 2:
+            run = False
+
         # update
         pygame.display.update()
         clock.tick(FPS)
