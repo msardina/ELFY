@@ -1,3 +1,4 @@
+from pathlib import Path
 import pygame
 import os
 import random
@@ -5,6 +6,8 @@ from pygame import mixer
 
 pygame.init()
 mixer.init()
+
+FOLDER_ASSETS = Path("assets")
 
 
 # scaler
@@ -14,10 +17,18 @@ def scale_img(img, scale_factor):
 
 
 # load images
-elf_run_1 = scale_img(pygame.image.load(os.path.join("assets", "run1.png")), 2)
-elf_run_2 = scale_img(pygame.image.load(os.path.join("assets", "run2.png")), 2)
-elf_stand = scale_img(pygame.image.load(os.path.join("assets", "stand.png")), 2)
+elf_run_1 = scale_img(pygame.image.load(FOLDER_ASSETS / "run1.png"), 2)
+elf_run_2 = scale_img(pygame.image.load(FOLDER_ASSETS / "run2.png"), 2)
+elf_stand = scale_img(pygame.image.load(FOLDER_ASSETS / "stand.png"), 2)
 elf_imgs = [elf_run_1, elf_run_2, elf_stand]
+
+present_imgs = []
+for i in range(1, 5):
+    present_imgs.append(
+        scale_img(pygame.image.load(FOLDER_ASSETS / f"present{i}.png"), 3)
+    )
+print(len(present_imgs))
+print(present_imgs)
 # setup screen
 FLOOR_HEIGHT = 60
 WIDTH, HEIGHT = 800, 800
@@ -27,6 +38,28 @@ pygame.display.set_caption("ELFY")
 # setup clock
 clock = pygame.time.Clock()
 FPS = 60
+
+
+class Present:
+    def __init__(self, x, y, img):
+        self.x = x
+        self.y = y
+        self.img = img
+        self.width = self.img.get_width()
+        self.height = self.img.get_height()
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.speed = 3
+
+    def draw(self):
+        screen.blit(self.img, (self.x, self.y))
+
+    def move(self):
+        self.y += self.speed
+
+    def is_offscreen(self):
+        if self.y > HEIGHT:
+            return True
+        return False
 
 
 class Elf:
@@ -69,9 +102,12 @@ class Elf:
 def game():
     # variables
     run = True
-    timer = 0
+    animate_timer = 0
+    present_timer = 0
+
     # objects
     player = Elf(0, HEIGHT - elf_imgs[2].get_height() - FLOOR_HEIGHT, elf_imgs)
+    presents = []
 
     # main game loop
     while run:
@@ -84,17 +120,38 @@ def game():
         # draw
         screen.fill("white")
         player.draw()
+
         # move
         player.move(pygame.key.get_pressed())
+
         # animate
-        if timer > 1:
+        if animate_timer > 1:
             player.animate(pygame.key.get_pressed())
-            print("animate!")
-            timer = 0
+            animate_timer = 0
+
+        # spawn presents
+        if present_timer > 2:
+            presents.append(
+                Present(
+                    random.randint(0, WIDTH - present_imgs[0].get_width()),
+                    0 - present_imgs[0].get_height(),
+                    present_imgs[random.randint(0, 3)],
+                )
+            )
+            present_timer = 0
+
+        # draw presents
+        for present in presents:
+            present.draw()
+            present.move()
+            if present.is_offscreen():
+                presents.remove(present)
+
         # update
         pygame.display.update()
         clock.tick(FPS)
-        timer += 0.13
+        animate_timer += 0.13
+        present_timer += 0.013
 
 
 # run whole game
