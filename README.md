@@ -33,6 +33,7 @@ Collect the colorful presents to earn a higher score but remember to be careful 
 
 If you find any glitches or problems please report an issue on this github repository.
 
+Thank you!
 
 ## Screenshots 📷
 
@@ -42,7 +43,7 @@ If you find any glitches or problems please report an issue on this github repos
 # Gameplay
 
 To watch gameplay click [here](https://www.youtube.com/watch?v=tCs4aJ8lckg)
-  
+
 ## Credits 🎖️
 
 - Code and art by Marcos Sardina (`msardina`)
