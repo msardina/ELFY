@@ -6,6 +6,12 @@ from pygame import mixer
 
 pygame.init()
 mixer.init()
+pygame.joystick.init()
+
+
+# setup joysticks
+joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+print(joysticks)
 
 FOLDER_ASSETS = Path("assets")
 FOLDER_SOUNDS = Path("sfx")
@@ -110,7 +116,7 @@ class Elf:
     def draw(self):
         screen.blit(self.img, (self.x, self.y))
 
-    def move(self, keys):
+    def move(self, keys, a_button, side_button):
 
         if not self.die:
             # keys
@@ -120,6 +126,15 @@ class Elf:
                 self.x -= self.speed
             if keys[pygame.K_UP] and self.y == HEIGHT - self.height:
                 self.dy = 13
+
+            # joysticks
+            if a_button and self.y == HEIGHT - self.height:
+                self.dy = 13
+
+            if side_button == -1 and self.x > 0:
+                self.x -= self.speed
+            if side_button == 1 and self.x < WIDTH - self.width:
+                self.x += self.speed
 
         self.y -= self.dy
 
@@ -226,7 +241,7 @@ def title():
         keys = pygame.key.get_pressed()
 
         # START ANIMATION
-        if keys[pygame.K_RETURN]:
+        if keys[pygame.K_RETURN] or pygame.joystick.Joystick(0).get_button(1):
             begin = True
         if begin:
             elf_begin_y += elf_begin_dy
@@ -278,12 +293,18 @@ def game():
     skier_random = 0
 
     # main game loop
+
     while run:
+        a_button = False
         for event in pygame.event.get():  # loop through all events in passed frame
             if event.type == pygame.QUIT:  # quit if x button pressed
                 run = False
                 pygame.quit()
                 quit()
+            if event.type == pygame.JOYBUTTONDOWN:
+                if pygame.joystick.Joystick(0).get_button(1):
+                    a_button = True
+        side_button = round(pygame.joystick.Joystick(0).get_axis(0))
 
         # render text
         score_text = title_font.render(f"{score}", True, (0, 0, 0))
@@ -294,7 +315,7 @@ def game():
         screen.blit(score_text, (WIDTH / 2 - score_text.get_width() / 2, 50))
 
         # move
-        player.move(pygame.key.get_pressed())
+        player.move(pygame.key.get_pressed(), a_button, side_button)
 
         # animate
         if animate_timer > 1:
