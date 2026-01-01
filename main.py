@@ -120,21 +120,21 @@ class Elf:
 
         if not self.die:
             # keys
-            if keys[pygame.K_RIGHT] and self.x < WIDTH - self.width:
+            if (keys[pygame.K_RIGHT] and self.x < WIDTH - self.width) or (
+                side_button == 1 and self.x < WIDTH - self.width
+            ):
                 self.x += self.speed
-            if keys[pygame.K_LEFT] and self.x > 0:
+            if (keys[pygame.K_LEFT] and self.x > 0) or (
+                side_button == -1 and self.x > 0
+            ):
                 self.x -= self.speed
-            if keys[pygame.K_UP] and self.y == HEIGHT - self.height:
+            if (
+                keys[pygame.K_UP]
+                and self.y == HEIGHT - self.height
+                or a_button
+                and self.y == HEIGHT - self.height
+            ):
                 self.dy = 13
-
-            # joysticks
-            if a_button and self.y == HEIGHT - self.height:
-                self.dy = 13
-
-            if side_button == -1 and self.x > 0:
-                self.x -= self.speed
-            if side_button == 1 and self.x < WIDTH - self.width:
-                self.x += self.speed
 
         self.y -= self.dy
 
