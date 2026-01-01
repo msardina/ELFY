@@ -241,7 +241,9 @@ def title():
         keys = pygame.key.get_pressed()
 
         # START ANIMATION
-        if keys[pygame.K_RETURN] or pygame.joystick.Joystick(0).get_button(1):
+        if keys[pygame.K_RETURN]:
+            begin = True
+        if len(joysticks) > 0 and pygame.joystick.Joystick(0).get_button(1):
             begin = True
         if begin:
             elf_begin_y += elf_begin_dy
@@ -278,6 +280,8 @@ def game():
     present_spawn = 1
     difficulty_timer = 0
     die = False
+    side_button = False
+    a_button = False
 
     # music
     collect_sfx.play()
@@ -301,10 +305,12 @@ def game():
                 run = False
                 pygame.quit()
                 quit()
-            if event.type == pygame.JOYBUTTONDOWN:
-                if pygame.joystick.Joystick(0).get_button(1):
-                    a_button = True
-        side_button = round(pygame.joystick.Joystick(0).get_axis(0))
+            if len(joysticks) > 0:
+                if event.type == pygame.JOYBUTTONDOWN:
+                    if pygame.joystick.Joystick(0).get_button(1):
+                        a_button = True
+        if len(joysticks) > 0:
+            side_button = round(pygame.joystick.Joystick(0).get_axis(0))
 
         # render text
         score_text = title_font.render(f"{score}", True, (0, 0, 0))
