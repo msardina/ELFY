@@ -3,9 +3,11 @@ import pygame
 import os
 import random
 from pygame import mixer
+from pygame import font
 
 pygame.init()
 mixer.init()
+font.init()
 pygame.joystick.init()
 
 
@@ -15,11 +17,12 @@ print(joysticks)
 
 FOLDER_ASSETS = Path("assets")
 FOLDER_SOUNDS = Path("sfx")
+FOLDER_FONT = Path("font")
 
 # setup font
-font = pygame.font.SysFont("freesansbold", 50)
-title_font = pygame.font.SysFont(None, 100)
-medium_font = pygame.font.SysFont(None, 75)
+font = pygame.font.SysFont("font1.ttf", 50)
+title_font = pygame.font.SysFont("font1.tf", 100)
+medium_font = pygame.font.SysFont("font1.tff", 75)
 
 # const
 GRAVITY = 0.4
@@ -35,34 +38,45 @@ collect_sfx = pygame.mixer.Sound(FOLDER_SOUNDS / "collect.wav")
 
 
 # scaler
-def scale_img(img, scale_factor):
+def scale_img_square(img, scale_factor):
     new_size = [img.get_width() * scale_factor, img.get_height() * scale_factor]
     return pygame.transform.scale(img, new_size)
 
 
+def scale_screen_image(img, scale_factor_width, scale_factor_height):
+    new_size = [
+        img.get_width() * scale_factor_width,
+        img.get_height() * scale_factor_height,
+    ]
+    return pygame.transform.scale(img, new_size)
+
+
 # load images
-elf_run_1 = scale_img(pygame.image.load(FOLDER_ASSETS / "run1.png"), 2.5)
-elf_run_2 = scale_img(pygame.image.load(FOLDER_ASSETS / "run2.png"), 2.5)
-elf_stand = scale_img(pygame.image.load(FOLDER_ASSETS / "stand.png"), 2.5)
+elf_run_1 = scale_img_square(pygame.image.load(FOLDER_ASSETS / "run1.png"), 2.5)
+elf_run_2 = scale_img_square(pygame.image.load(FOLDER_ASSETS / "run2.png"), 2.5)
+elf_stand = scale_img_square(pygame.image.load(FOLDER_ASSETS / "stand.png"), 2.5)
 elf_imgs = [elf_run_1, elf_run_2, elf_stand]
 
-skier_1_img = scale_img(pygame.image.load(FOLDER_ASSETS / "ski1.png"), 1)
-skier_2_img = scale_img(pygame.image.load(FOLDER_ASSETS / "ski2.png"), 1)
-skier_3_img = scale_img(pygame.image.load(FOLDER_ASSETS / "ski3.png"), 1)
+skier_1_img = scale_img_square(pygame.image.load(FOLDER_ASSETS / "ski1.png"), 1)
+skier_2_img = scale_img_square(pygame.image.load(FOLDER_ASSETS / "ski2.png"), 1)
+skier_3_img = scale_img_square(pygame.image.load(FOLDER_ASSETS / "ski3.png"), 1)
 skiers_imgs = [skier_1_img, skier_2_img, skier_3_img]
 present_imgs = []
 for i in range(1, 5):
     present_imgs.append(
-        scale_img(pygame.image.load(FOLDER_ASSETS / f"present{i}.png"), 4)
+        scale_img_square(pygame.image.load(FOLDER_ASSETS / f"present{i}.png"), 4)
     )
-elf_title = scale_img(pygame.image.load(FOLDER_ASSETS / "title.png"), 1)
-arrows = scale_img(pygame.image.load(FOLDER_ASSETS / "arrows.png"), 1)
-begin_img = scale_img(pygame.image.load(FOLDER_ASSETS / "begin.png"), 1)
+elf_title = scale_img_square(pygame.image.load(FOLDER_ASSETS / "title.png"), 1)
+arrows = scale_img_square(pygame.image.load(FOLDER_ASSETS / "arrows.png"), 1)
+begin_img = scale_img_square(pygame.image.load(FOLDER_ASSETS / "begin.png"), 1)
+
 
 # setup screen
+original_screen_width = 800
+original_screen_height = 800
 FLOOR_HEIGHT = 60
-WIDTH, HEIGHT = 800, 800
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen_width, screen_height = original_screen_width, original_screen_height
+screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
 pygame.display.set_caption("ELFY")
 
 # setup clock
@@ -94,7 +108,7 @@ class Present:
         return False
 
     def is_present_over(self):
-        if self.y > HEIGHT:
+        if self.y > screen_height:
             return True
         return False
 
@@ -120,8 +134,8 @@ class Elf:
 
         if not self.die:
             # keys
-            if (keys[pygame.K_RIGHT] and self.x < WIDTH - self.width) or (
-                side_button == 1 and self.x < WIDTH - self.width
+            if (keys[pygame.K_RIGHT] and self.x < screen_width - self.width) or (
+                side_button == 1 and self.x < screen_width - self.width
             ):
                 self.x += self.speed
             if (keys[pygame.K_LEFT] and self.x > 0) or (
@@ -130,20 +144,20 @@ class Elf:
                 self.x -= self.speed
             if (
                 keys[pygame.K_UP]
-                and self.y == HEIGHT - self.height
+                and self.y == screen_height - self.height
                 or a_button
-                and self.y == HEIGHT - self.height
+                and self.y == screen_height - self.height
             ):
                 self.dy = 13
 
         self.y -= self.dy
 
-        if self.y < HEIGHT - self.height:
+        if self.y < screen_height - self.height:
             self.dy -= GRAVITY
         else:
             if not self.die:
                 self.dy = 0
-                self.y = HEIGHT - self.height
+                self.y = screen_height - self.height
         # update mask
         self.mask = pygame.mask.from_surface(self.img)
 
@@ -176,7 +190,7 @@ class Skier:
         if side == 0:
             self.x = 0 - self.width
         else:
-            self.x = WIDTH
+            self.x = screen_width
             self.img = pygame.transform.flip(self.img, True, False)
 
     def draw(self):
@@ -192,7 +206,7 @@ class Skier:
         self.mask = pygame.mask.from_surface(self.img)
 
     def is_offscreen(self):
-        if self.side == 0 and self.x > WIDTH:
+        if self.side == 0 and self.x > screen_width:
             return True
         if self.side == 1 and self.x < 0 - self.width:
             return True
@@ -209,6 +223,10 @@ class Skier:
 
 
 def title():
+
+    global screen_width
+    global screen_height
+
     # variables
     title = True
     begin = False
@@ -216,7 +234,7 @@ def title():
     elf_begin_dy = 0
     elf_num = 0
     animate_timer = 0
-    begin_x = WIDTH
+    begin_x = screen_width
 
     while title:
 
@@ -230,11 +248,14 @@ def title():
         screen.fill("white")
 
         if not begin:
-            screen.blit(elf_title, (WIDTH / 2 - elf_title.get_width() / 2, 100))
-            screen.blit(arrows, (WIDTH / 2 - arrows.get_width() / 2, 410))
-            screen.blit(begin_img, (begin_x, HEIGHT - begin_img.get_height() - 5))
+            screen.blit(elf_title, (screen_width / 2 - elf_title.get_width() / 2, 100))
+            screen.blit(arrows, (screen_width / 2 - arrows.get_width() / 2, 410))
+            screen.blit(
+                begin_img, (begin_x, screen_height - begin_img.get_height() - 5)
+            )
         screen.blit(
-            elf_imgs[elf_num], (WIDTH / 2 - elf_imgs[2].get_width() / 2, elf_begin_y)
+            elf_imgs[elf_num],
+            (screen_width / 2 - elf_imgs[2].get_width() / 2, elf_begin_y),
         )
 
         # keys
@@ -248,7 +269,7 @@ def title():
         if begin:
             elf_begin_y += elf_begin_dy
             elf_begin_dy += GRAVITY
-        if elf_begin_y > HEIGHT - elf_imgs[2].get_height():
+        if elf_begin_y > screen_height - elf_imgs[2].get_height():
             title = False
 
         if animate_timer > 1:
@@ -261,8 +282,12 @@ def title():
         # begin text
         begin_x -= 3
 
-        if begin_x < WIDTH * -1:
-            begin_x = WIDTH
+        if begin_x < screen_width * -1:
+            begin_x = screen_width
+
+        # rezise screen
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
 
         # update
         clock.tick(FPS)
@@ -271,6 +296,10 @@ def title():
 
 
 def game():
+
+    global screen_width
+    global screen_height
+
     # variables
     run = True
     animate_timer = 0
@@ -288,8 +317,8 @@ def game():
 
     # objects
     player = Elf(
-        WIDTH / 2 - elf_imgs[2].get_width() / 2,
-        HEIGHT - elf_imgs[2].get_height(),
+        screen_width / 2 - elf_imgs[2].get_width() / 2,
+        screen_height - elf_imgs[2].get_height(),
         elf_imgs,
     )
     presents = []
@@ -318,7 +347,7 @@ def game():
         # draw
         screen.fill("white")
         player.draw()
-        screen.blit(score_text, (WIDTH / 2 - score_text.get_width() / 2, 50))
+        screen.blit(score_text, (screen_width / 2 - score_text.get_width() / 2, 50))
 
         # move
         player.move(pygame.key.get_pressed(), a_button, side_button)
@@ -332,7 +361,7 @@ def game():
         if present_timer > present_spawn:
             presents.append(
                 Present(
-                    random.randint(0, WIDTH - present_imgs[0].get_width()),
+                    random.randint(0, screen_width - present_imgs[0].get_width()),
                     0 - present_imgs[0].get_height(),
                     present_imgs[random.randint(0, 3)],
                 )
@@ -385,7 +414,7 @@ def game():
             skier_random = random.randint(0, 2)
             skiers.append(
                 Skier(
-                    HEIGHT - skiers_imgs[skier_random].get_height(),
+                    screen_height - skiers_imgs[skier_random].get_height(),
                     skiers_imgs[skier_random],
                     random.randint(0, 1),
                 )
@@ -398,8 +427,15 @@ def game():
 
         # game over
 
-        if player.y > HEIGHT * 2:
+        if player.y > screen_height * 2:
             run = False
+
+        # rezise screen
+
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
+        screen_scale_factor_width = screen_width / original_screen_width
+        screen_scale_factor_height = screen_height / original_screen_height
 
         # update
         pygame.display.update()
