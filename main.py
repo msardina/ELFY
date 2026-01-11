@@ -257,6 +257,8 @@ def title():
     elf_num = 0
     animate_timer = 0
     begin_x = screen_width
+    last_screen_width = screen_width
+    last_screen_height = screen_height
     screen_scale_factor_width = screen_width / original_screen_width
     screen_scale_factor_height = screen_height / original_screen_height
 
@@ -267,6 +269,55 @@ def title():
                 title = False
                 pygame.quit()
                 quit()
+
+        # check for new screen size and rezise if needed
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
+        # check for resize screen
+        if (
+            not last_screen_width == screen_width
+            or not last_screen_height == screen_height
+        ):
+            screen_scale_factor_width = screen_width / original_screen_width
+            screen_scale_factor_height = screen_height / original_screen_height
+            elf_title = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "title.png"),
+                screen_scale_factor_width,
+                screen_scale_factor_height,
+            )
+            arrows = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "arrows.png"),
+                screen_scale_factor_width,
+                screen_scale_factor_height,
+            )
+            begin_img = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "begin.png"),
+                screen_scale_factor_width,
+                screen_scale_factor_height,
+            )
+            elf_run_1 = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "run1.png"),
+                screen_scale_factor_width * 2.5,
+                screen_scale_factor_height * 2.5,
+            )
+            elf_run_2 = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "run2.png"),
+                screen_scale_factor_width * 2.5,
+                screen_scale_factor_height * 2.5,
+            )
+            elf_stand = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "stand.png"),
+                screen_scale_factor_width * 2.5,
+                screen_scale_factor_height * 2.5,
+            )
+            elf_imgs = [elf_run_1, elf_run_2, elf_stand]
+
+            # update gravity
+
+            gravity = 0.4 * screen_scale_factor_height
+
+            last_screen_width = screen_width
+            last_screen_height = screen_height
 
         # draw
         screen.fill("white")
@@ -316,47 +367,6 @@ def title():
         if begin_x < screen_width * -1:
             begin_x = screen_width
 
-        # rezise screen
-
-        screen_width = screen.get_width()
-        screen_height = screen.get_height()
-        screen_scale_factor_width = screen_width / original_screen_width
-        screen_scale_factor_height = screen_height / original_screen_height
-        elf_title = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "title.png"),
-            screen_scale_factor_width,
-            screen_scale_factor_height,
-        )
-        arrows = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "arrows.png"),
-            screen_scale_factor_width,
-            screen_scale_factor_height,
-        )
-        begin_img = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "begin.png"),
-            screen_scale_factor_width,
-            screen_scale_factor_height,
-        )
-        elf_run_1 = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "run1.png"),
-            screen_scale_factor_width * 2.5,
-            screen_scale_factor_height * 2.5,
-        )
-        elf_run_2 = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "run2.png"),
-            screen_scale_factor_width * 2.5,
-            screen_scale_factor_height * 2.5,
-        )
-        elf_stand = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "stand.png"),
-            screen_scale_factor_width * 2.5,
-            screen_scale_factor_height * 2.5,
-        )
-        elf_imgs = [elf_run_1, elf_run_2, elf_stand]
-
-        # update gravity
-
-        gravity = 0.4 * screen_scale_factor_height
         # update
         clock.tick(FPS)
         pygame.display.update()
@@ -390,6 +400,8 @@ def game():
     a_button = False
     screen_scale_factor_width = screen_width / original_screen_width
     screen_scale_factor_height = screen_height / original_screen_height
+    last_screen_width = screen_width
+    last_screen_height = screen_height
 
     # music
     collect_sfx.play()
@@ -419,6 +431,64 @@ def game():
                         a_button = True
         if len(joysticks) > 0:
             side_button = round(pygame.joystick.Joystick(0).get_axis(0))
+
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
+
+        # check for resize screen
+        if (
+            not last_screen_width == screen_width
+            or not last_screen_height == screen_height
+        ):
+            screen_scale_factor_width = screen_width / original_screen_width
+            screen_scale_factor_height = screen_height / original_screen_height
+
+            elf_run_1 = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "run1.png"),
+                screen_scale_factor_width * 2.5,
+                screen_scale_factor_height * 2.5,
+            )
+            elf_run_2 = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "run2.png"),
+                screen_scale_factor_width * 2.5,
+                screen_scale_factor_height * 2.5,
+            )
+            elf_stand = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "stand.png"),
+                screen_scale_factor_width * 2.5,
+                screen_scale_factor_height * 2.5,
+            )
+            elf_imgs = [elf_run_1, elf_run_2, elf_stand]
+            skier_1_img = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "ski1.png"),
+                screen_scale_factor_width,
+                screen_scale_factor_height,
+            )
+            skier_2_img = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "ski2.png"),
+                screen_scale_factor_width,
+                screen_scale_factor_height,
+            )
+            skier_3_img = scale_screen_image(
+                pygame.image.load(FOLDER_ASSETS / "ski3.png"),
+                screen_scale_factor_width,
+                screen_scale_factor_height,
+            )
+            skiers_imgs = [skier_1_img, skier_2_img, skier_3_img]
+            present_imgs = []
+            for i in range(1, 5):
+                present_imgs.append(
+                    scale_screen_image(
+                        pygame.image.load(FOLDER_ASSETS / f"present{i}.png"),
+                        screen_scale_factor_width * 4,
+                        screen_scale_factor_height * 4,
+                    )
+                )
+            # update gravity
+            gravity = 0.4 * screen_scale_factor_height
+
+            last_screen_width = screen_width
+            last_screen_height = screen_height
 
         # render text
         score_text = title_font.render(f"{score}", True, (0, 0, 0))
@@ -516,57 +586,6 @@ def game():
         if player.y > screen_height * 2:
             run = False
 
-        # rezise screen
-
-        screen_width = screen.get_width()
-        screen_height = screen.get_height()
-        screen_scale_factor_width = screen_width / original_screen_width
-        screen_scale_factor_height = screen_height / original_screen_height
-
-        elf_run_1 = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "run1.png"),
-            screen_scale_factor_width * 2.5,
-            screen_scale_factor_height * 2.5,
-        )
-        elf_run_2 = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "run2.png"),
-            screen_scale_factor_width * 2.5,
-            screen_scale_factor_height * 2.5,
-        )
-        elf_stand = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "stand.png"),
-            screen_scale_factor_width * 2.5,
-            screen_scale_factor_height * 2.5,
-        )
-        elf_imgs = [elf_run_1, elf_run_2, elf_stand]
-        skier_1_img = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "ski1.png"),
-            screen_scale_factor_width,
-            screen_scale_factor_height,
-        )
-        skier_2_img = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "ski2.png"),
-            screen_scale_factor_width,
-            screen_scale_factor_height,
-        )
-        skier_3_img = scale_screen_image(
-            pygame.image.load(FOLDER_ASSETS / "ski3.png"),
-            screen_scale_factor_width,
-            screen_scale_factor_height,
-        )
-        skiers_imgs = [skier_1_img, skier_2_img, skier_3_img]
-        present_imgs = []
-        for i in range(1, 5):
-            present_imgs.append(
-                scale_screen_image(
-                    pygame.image.load(FOLDER_ASSETS / f"present{i}.png"),
-                    screen_scale_factor_width * 4,
-                    screen_scale_factor_height * 4,
-                )
-            )
-        # update gravity
-
-        gravity = 0.4 * screen_scale_factor_height
         # update
         pygame.display.update()
         clock.tick(FPS)
