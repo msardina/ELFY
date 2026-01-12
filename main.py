@@ -269,7 +269,7 @@ def title():
                 title = False
                 pygame.quit()
                 quit()
-
+        print(screen_width, screen_height)
         # check for new screen size and rezise if needed
         screen_width = screen.get_width()
         screen_height = screen.get_height()
@@ -388,6 +388,7 @@ def game():
     global present_imgs
     global gravity
     # variables
+    first_time = True
     run = True
     animate_timer = 0
     present_timer = 0
@@ -439,6 +440,7 @@ def game():
         if (
             not last_screen_width == screen_width
             or not last_screen_height == screen_height
+            or first_time
         ):
             screen_scale_factor_width = screen_width / original_screen_width
             screen_scale_factor_height = screen_height / original_screen_height
@@ -489,6 +491,8 @@ def game():
 
             last_screen_width = screen_width
             last_screen_height = screen_height
+
+            first_time = False
 
         # render text
         score_text = title_font.render(f"{score}", True, (0, 0, 0))
