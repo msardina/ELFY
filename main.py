@@ -21,7 +21,7 @@ FOLDER_FONT = Path("font")
 
 # setup font
 font = pygame.font.SysFont("font1.ttf", 50)
-title_font = pygame.font.SysFont("font1.tf", 100)
+title_font = pygame.font.SysFont("font1.ttf", 100)
 medium_font = pygame.font.SysFont("font1.tff", 75)
 
 # const
@@ -269,7 +269,6 @@ def title():
                 title = False
                 pygame.quit()
                 quit()
-        print(screen_width, screen_height)
         # check for new screen size and rezise if needed
         screen_width = screen.get_width()
         screen_height = screen.get_height()
